@@ -4,8 +4,8 @@ import discord
 from discord.ext import commands
 from discord import app_commands
 
-TRELLO_API_KEY = KEY
-TRELLO_TOKEN = TOKEN
+TRELLO_API_KEY = "KEY"
+TRELLO_TOKEN = "TOKEN"
 cardPos = "bottom"
 trello = TrelloApi(TRELLO_API_KEY, TRELLO_TOKEN)
 
@@ -83,11 +83,12 @@ async def on_ready():
     except Exception as e:
         print(e)
 
-@bot.tree.command(name="ping")
-async def ping(interaction: discord.Interaction):
-    await interaction.response.send_message(f"Hey {interaction.user.mention}! Pong!")
+@bot.tree.command(name="ping", description="Funny admin abuse")
+async def ping(interaction: discord.Interaction, user: discord.Member):
+    await interaction.response.send_message("Admin Aboose!!!", ephemeral=True)
+    await interaction.channel.send(f"{user.mention} <:trololo:1026909534192681062>")
 
-@bot.tree.command(name="apply")
+@bot.tree.command(name="apply", description="Our command to apply to the faction! fill out the form that shows up and wait before you get accepted.")
 async def apply(interaction: discord.Interaction):
     form = ApplicationForm()
     verified = interaction.guild.get_role(1026838130101342278)
@@ -99,7 +100,7 @@ async def apply(interaction: discord.Interaction):
     except Exception as e:
         print(e)
 
-@bot.tree.command(name="accept_commission")
+@bot.tree.command(name="accept_commission", description="used to accept commissioning applications found in commissioning logs")
 async def accept_app(interaction: discord.Interaction, user_id: discord.Member, timezone: discord.Role):
     await interaction.response.send_message(f"Sending application result\nGiven role: {timezone}", ephemeral=True)
 
@@ -114,7 +115,7 @@ async def accept_app(interaction: discord.Interaction, user_id: discord.Member, 
     await user_id.add_roles(interaction.guild.get_role(1026852084785614969), reason='Passed commissioning')
     await user_id.add_roles(interaction.guild.get_role(timezone.id), reason='Passed commissioning')
 
-@bot.tree.command(name="register_ship")
+@bot.tree.command(name="register_ship", description="command to register ships on our trello/database, once registered your ship will go into a sorting list before getting qadded to the rest of the trello")
 async def register_ship(interaction: discord.Interaction, owner: str, ship_name: str, ship_type: str, skin: str, image_link: str):
     try:
         embed = discord.Embed(
@@ -132,13 +133,22 @@ async def register_ship(interaction: discord.Interaction, owner: str, ship_name:
         await interaction.response.send_message("Trello successfully updated.", ephemeral=True)
         await interaction.guild.get_channel(1165994826286772255).send(embed=embed)
     except Exception as error:
-        await interaction.response.send_message("Invalid syntax, please try again.", ephemeral=True)
+        await interaction.response.send_message("Error occurred, please try again.", ephemeral=True)
         await interaction.guild.get_channel(1060345512970166364).send(error)
         print(error)
 
-@bot.tree.command(name="roles")
-async def roles(interaction: discord.Interaction):
-    await interaction.response.send_message(f"{interaction.user.roles}\n\n{interaction.guild.get_role(1026852084785614969)}")
-    print(interaction.user.roles, interaction.guild.get_role(1026852084785614969))
+@bot.tree.command(name="announce", description="announce something to a specific channel in the server")
+async def announce(interaction: discord.Interaction, message: str, channel: discord.TextChannel, ping: bool):
+    try:
+        if ping:
+            await interaction.response.send_message('Successfully announced your message to the server', ephemeral=True)
+            await channel.send(f"{message}\n\n<@&1026838130101342278>")
+        else:
+            await interaction.response.send_message('Successfully announced your message to the server', ephemeral=True)
+            await channel.send(message)
+    except:
+        await interaction.response.send_message("Error occurred, please try again.", ephemeral=True)
+        await interaction.guild.get_channel(1060345512970166364).send(error)
+        print(error)
 
-bot.run(TOKEN)
+bot.run('TOKEN')
